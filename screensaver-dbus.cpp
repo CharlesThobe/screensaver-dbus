@@ -1,16 +1,18 @@
 #include <dbus/dbus.h>
 static DBusConnection* connection = nullptr;
-static dbus_uint32_t inhibit_cookie;
+static dbus_uint32_t cookie;
 bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name = (char*)"ignored", char* reason = (char*)"ignored")
 {
+	//Initialize a DBusError var.
 	DBusError error_dbus;
 	dbus_error_init(&error_dbus);
-	/*Initialize connection.
-	If a connection to the bus already exists, then that connection is returned.*/
+	//Initialize connection.
+	//If a connection to the bus already exists, then that connection is returned.
 	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
 	if (!connection || dbus_error_is_set(&error_dbus))
 	{
 		dbus_error_free(&error_dbus);
+		dbus_connection_unref(connection);
 		return false;
 	}
 	char* dbus_method;
@@ -50,46 +52,49 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 	}
 	else
 	{
-		//Handle the cookie.
-		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &inhibit_cookie))
+		//Append the cookie.
+		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &cookie))
 		{
 			dbus_message_unref(message);
 			return false;
 		}
 	}
+	//Send message and get response.
 	DBusMessage* response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
 	if (!response || dbus_error_is_set(&error_dbus))
 	{
 		dbus_error_free(&error_dbus);
 		dbus_message_unref(message);
+		dbus_message_unref(response);
 		return false;
 	}
-	//Get the cookie when inhibiting the screensaver.
+	//Get the cookie from the response message.
 	if (inhibit_requested)
 	{
-		//Initiates an iterator of the response message to get elements out of it.
-		DBusMessageIter response_itr;
-		dbus_message_iter_init(response, &response_itr);
-		if (dbus_message_iter_get_arg_type(&response_itr) != DBUS_TYPE_UINT32)
+		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &cookie, DBUS_TYPE_INVALID))
 		{
+			dbus_error_free(&error_dbus);
 			dbus_message_unref(message);
+			dbus_message_unref(response);
 			return false;
 		}
-		dbus_message_iter_get_basic(&response_itr, &inhibit_cookie);
 	}
 	dbus_message_unref(message);
-	/*Reset connection on uninhibit, helpful in case of a dbus crash, reset or reinstallation.
-	these case are probably a red herring.*/
-	/*
+	dbus_message_unref(response);
+	#ifdef TEST
+	//Reset connection on uninhibit, helpful in case of a dbus crash, reset or reinstallation.
+	//these cases are probably a red herring.
+	
 	if (!inhibit_requested)
 	{
 		dbus_connection_unref(connection);
 	}
-	*/
+	#endif
 	return true;
 	
 }
 
+#ifdef TEST
 #include <mutex>
 int main(){
 	//while(true){looped();}
@@ -108,3 +113,4 @@ int main(){
 
 	return 0;
 }
+#endif
