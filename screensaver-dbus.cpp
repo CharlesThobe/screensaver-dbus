@@ -96,17 +96,17 @@ bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = 
 #ifdef TEST
 #include <mutex>
 int main(){
-	ChangeScreenSaverState(true, (char*)"yeah", (char*)"nah");
+	ChangeScreenSaverState(true, (char*)"Test ProgName", (char*)"Test Reason");
 	printf("Ihibited\nPress enter to uninhibit.\n");
 	getchar();
-	ChangeScreenSaverState(false, (char*)"yeah", (char*)"nah");
+	ChangeScreenSaverState(false, (char*)"Test ProgName", (char*)"Test Reason");
 	printf("uninhibited\nPress enter to test for memory leaks.\n");
 	getchar();
 	printf("Stress running\nPress ctl+c to terminate\n");
 	while(true)
 	{
-		ChangeScreenSaverState(true, (char*)"yeah", (char*)"nah");
-		ChangeScreenSaverState(false, (char*)"yeah", (char*)"nah");
+		ChangeScreenSaverState(true, (char*)"Test ProgName", (char*)"Test Reason");
+		ChangeScreenSaverState(false, (char*)"Test ProgName", (char*)"Test Reason");
 	}
 
 	return 0;
