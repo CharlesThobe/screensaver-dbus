@@ -97,14 +97,13 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 #ifdef TEST
 #include <mutex>
 int main(){
-	//while(true){looped();}
 	Send_ScreenSaver_Inhibit(true, (char*)"yeah", (char*)"nah");
 	printf("Ihibited\nPress enter to uninhibit.\n");
 	getchar();
 	Send_ScreenSaver_Inhibit(false, (char*)"yeah", (char*)"nah");
-	printf("uninhibited\nPress enter to exit.\n");
+	printf("uninhibited\nPress enter to test for memory leaks.\n");
 	getchar();
-	printf("checking for leaks");
+	printf("Stress running\nPress ctl+c to terminate\n");
 	while(true)
 	{
 		Send_ScreenSaver_Inhibit(true, (char*)"yeah", (char*)"nah");
