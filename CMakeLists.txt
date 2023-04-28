@@ -3,15 +3,15 @@ project("screensaver-gdbus")
 
 if(TEST)
     add_executable(screensaver-dbus
-    screensaver-dbus.cpp
+    src/screensaver-dbus.cpp
     )
     add_compile_definitions(TEST)
     install(TARGETS screensaver-dbus DESTINATION bin)
 else()
     add_library(screensaver-dbus
-    screensaver-dbus.cpp
+    src/screensaver-dbus.cpp
     )
-    install(TARGETS screensaver-dbus DESTINATION bin)
+    install(TARGETS screensaver-dbus DESTINATION lib)
 endif()
 
 if(CONNECTION_RESET)
