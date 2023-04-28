@@ -1,7 +1,7 @@
 #include <dbus/dbus.h>
 static DBusConnection* connection = nullptr;
 static dbus_uint32_t cookie;
-bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name = (char*)"ignored", char* reason = (char*)"ignored")
+bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = (char*)"Unknown", char* reason = (char*)"Unknown")
 {
 	//Initialize a DBusError var.
 	DBusError error_dbus;
@@ -96,17 +96,17 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 #ifdef TEST
 #include <mutex>
 int main(){
-	Send_ScreenSaver_Inhibit(true, (char*)"yeah", (char*)"nah");
+	ChangeScreenSaverState(true, (char*)"yeah", (char*)"nah");
 	printf("Ihibited\nPress enter to uninhibit.\n");
 	getchar();
-	Send_ScreenSaver_Inhibit(false, (char*)"yeah", (char*)"nah");
+	ChangeScreenSaverState(false, (char*)"yeah", (char*)"nah");
 	printf("uninhibited\nPress enter to test for memory leaks.\n");
 	getchar();
 	printf("Stress running\nPress ctl+c to terminate\n");
 	while(true)
 	{
-		Send_ScreenSaver_Inhibit(true, (char*)"yeah", (char*)"nah");
-		Send_ScreenSaver_Inhibit(false, (char*)"yeah", (char*)"nah");
+		ChangeScreenSaverState(true, (char*)"yeah", (char*)"nah");
+		ChangeScreenSaverState(false, (char*)"yeah", (char*)"nah");
 	}
 
 	return 0;
