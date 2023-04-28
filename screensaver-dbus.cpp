@@ -81,7 +81,7 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 	}
 	dbus_message_unref(message);
 	dbus_message_unref(response);
-	#ifdef TEST
+	#ifdef CONNECTION
 	//Reset connection on uninhibit, helpful in case of a dbus crash, reset or reinstallation.
 	//these cases are probably a red herring.
 	

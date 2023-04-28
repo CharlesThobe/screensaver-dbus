@@ -14,6 +14,11 @@ else()
     install(TARGETS screensaver-dbus DESTINATION bin)
 endif()
 
+if(CONNECTION_RESET)
+    add_compile_definitions(CONNECTION_RESET)
+endif()
+
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
 target_link_libraries(screensaver-dbus PkgConfig::DBUS)
