@@ -1,4 +1,7 @@
 #include <dbus/dbus.h>
+#define BUS_NAME "org.freedesktop.ScreenSaver"
+#define BUS_PATH "/org/freedesktop/ScreenSaver"
+#define BUS_INTERFACE "org.freedesktop.ScreenSaver"
 static DBusConnection* connection = nullptr;
 static dbus_uint32_t cookie;
 bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = (char*)"Unknown", char* reason = (char*)"Unknown")
@@ -24,10 +27,7 @@ bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = 
 	{
 		dbus_method = (char*)"UnInhibit";
 	}
-	DBusMessage* message = dbus_message_new_method_call("org.freedesktop.ScreenSaver",
-														"/org/freedesktop/ScreenSaver",
-														"org.freedesktop.ScreenSaver",
-														dbus_method);
+	DBusMessage* message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, dbus_method);
 	if (!message)
 	{
 		return false;
