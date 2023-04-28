@@ -7,7 +7,7 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 	DBusError error_dbus;
 	dbus_error_init(&error_dbus);
 	//Initialize connection.
-	//If a connection to the bus already exists, then that connection is returned.
+	//With dbus_bus_get() If a connection to the bus already exists, then that connection is returned.
 	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
 	if (!connection || dbus_error_is_set(&error_dbus))
 	{
@@ -32,7 +32,7 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 	{
 		return false;
 	}
-	//Initialize an appendable iterator for the message, gets freed with the message.
+	//Initialize an append iterator for the message, gets freed with the message.
 	DBusMessageIter message_itr;
 	dbus_message_iter_init_append(message, &message_itr);
 	if (inhibit_requested)
@@ -52,7 +52,7 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 	}
 	else
 	{
-		//Append the cookie.
+		//Only Append the cookie.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &cookie))
 		{
 			dbus_message_unref(message);
@@ -81,10 +81,9 @@ bool Send_ScreenSaver_Inhibit(bool inhibit_requested = true, char* program_name 
 	}
 	dbus_message_unref(message);
 	dbus_message_unref(response);
-	#ifdef CONNECTION
+	#ifdef CONNECTION_RESET
 	//Reset connection on uninhibit, helpful in case of a dbus crash, reset or reinstallation.
 	//these cases are probably a red herring.
-	
 	if (!inhibit_requested)
 	{
 		dbus_connection_unref(connection);
