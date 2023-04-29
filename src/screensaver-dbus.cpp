@@ -12,17 +12,14 @@ bool ChangeScreenSaverStateDBus(bool inhibit_requested, const char* program_name
 	DBusConnection* connection = nullptr;
 	DBusMessage* message = nullptr;
 	DBusMessage* response = nullptr;
+	// Initialized here because initializations should be before "goto" statements.
+	const char* bus_method = (inhibit_requested) ? "Inhibit" : "UnInhibit";
 	// "dbus_bus_get" gets a pointer to the same connection in libdbus, if exists, without creating a new connection.
 	// this doesn't need to be deleted, except if there's an error then calling "dbus_connection_unref", to free it,
 	// might be better so a new connection is established on the next try.
-	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
-	// "bus_method" must be initialized before checking if connection succeded
-	// because in C we can't jump over a variable declaration and initialization one liner with "goto".
-	const char* bus_method = (inhibit_requested) ? "Inhibit" : "UnInhibit";
-	if (!connection || dbus_error_is_set(&error_dbus))
+	if (!(connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus)) || (dbus_error_is_set(&error_dbus)))
 		goto cleanup;
-	message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, bus_method);
-	if (!message)
+	if (!(message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, bus_method)))
 		goto cleanup;
 	// Initialize an append iterator for the message, gets freed with the message.
 	DBusMessageIter message_itr;
@@ -44,8 +41,8 @@ bool ChangeScreenSaverStateDBus(bool inhibit_requested, const char* program_name
 		s_cookie = 0;
 	}
 	// Send message and get response.
-	response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
-	if (!response || dbus_error_is_set(&error_dbus))
+	if (!(response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus)) 
+		|| dbus_error_is_set(&error_dbus))
 		goto cleanup;
 	if (inhibit_requested)
 	{
