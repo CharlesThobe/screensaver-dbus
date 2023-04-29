@@ -2,28 +2,23 @@
 #define BUS_NAME "org.freedesktop.ScreenSaver"
 #define BUS_PATH "/org/freedesktop/ScreenSaver"
 #define BUS_INTERFACE "org.freedesktop.ScreenSaver"
-static DBusConnection* connection = nullptr;
-static dbus_uint32_t cookie;
-bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, char* program_name = (char*)"Unknown", char* reason = (char*)"Unknown")
+static dbus_uint32_t s_cookie;
+bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, const char* program_name = "Unknown", const char* reason = "Unknown")
 {
-	// Initialize a DBusError var.
 	DBusError error_dbus;
 	dbus_error_init(&error_dbus);
-	// Initialize connection.
-	// With dbus_bus_get() If a connection to the bus already exists, then that connection is returned.
+	DBusConnection* connection = nullptr;
+	DBusMessage* message = nullptr;
+	DBusMessage* response = nullptr;
 	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
+	// bus_method must be initialized before checking if connection succeded
+	// because in C we can't jump over a variable declaration and initialization one liner with "goto".
+	const char* bus_method = (inhibit_requested) ? "Inhibit" : "UnInhibit";
 	if (!connection || dbus_error_is_set(&error_dbus))
-	{
-		dbus_error_free(&error_dbus);
-		dbus_connection_unref(connection);
-		return false;
-	}
-	char* bus_method = (inhibit_requested) ? (char*)"Inhibit" : (char*)"UnInhibit";
-	DBusMessage* message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, bus_method);
+		goto cleanup;
+	message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, bus_method);
 	if (!message)
-	{
-		return false;
-	}
+		goto cleanup;
 	// Initialize an append iterator for the message, gets freed with the message.
 	DBusMessageIter message_itr;
 	dbus_message_iter_init_append(message, &message_itr);
@@ -31,61 +26,44 @@ bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, char* program_nam
 	{
 		// Append process/window name.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_STRING, &program_name))
-			{
-				dbus_message_unref(message);
-				return false;
-			}
+			goto cleanup;
 		// Append reason for inhibiting the screensaver.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_STRING, &reason))
-			{
-				dbus_message_unref(message);
-				return false;
-			}
+			goto cleanup;
 	}
 	else
 	{
 		// Only Append the cookie.
-		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &cookie))
-		{
-			dbus_message_unref(message);
-			return false;
-		}
-		cookie = 0;
+		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &s_cookie))
+			goto cleanup;
+		s_cookie = 0;
 	}
 	// Send message and get response.
-	DBusMessage* response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
+	response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
 	if (!response || dbus_error_is_set(&error_dbus))
-	{
-		dbus_error_free(&error_dbus);
-		dbus_message_unref(message);
-		dbus_message_unref(response);
-		return false;
-	}
+		goto cleanup;
 	// Get the cookie from the response message.
 	if (inhibit_requested)
 	{
-		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &cookie, DBUS_TYPE_INVALID))
-		{
-			dbus_error_free(&error_dbus);
-			dbus_message_unref(message);
-			dbus_message_unref(response);
-			return false;
-		}
+		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &s_cookie, DBUS_TYPE_INVALID))
+			goto cleanup;
 	}
 	dbus_message_unref(message);
 	dbus_message_unref(response);
-	#ifdef CONNECTION_RESET
-	// Reset connection on uninhibit, helpful in case of a dbus crash, reset or reinstallation.
-	// these cases are probably a red herring.
-	if (!inhibit_requested)
-	{
-		dbus_connection_unref(connection);
-	}
-	#endif
 	return true;
+	cleanup:
+			if (dbus_error_is_set(&error_dbus))
+				dbus_error_free(&error_dbus);
+			if (connection)
+				dbus_connection_unref(connection);
+			if (message)
+				dbus_message_unref(message);
+			if (response)
+				dbus_message_unref(response);
+			return false;
 }
 
 bool ScreenSaverStateDBusIsInhibited()
 {
-	return cookie;
+	return s_cookie;
 }
