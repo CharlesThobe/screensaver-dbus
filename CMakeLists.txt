@@ -17,6 +17,6 @@ endif()
 target_link_libraries(test PRIVATE screensaver-dbus)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
+pkg_check_modules(DBUS REQUIRED dbus-1)
 target_include_directories(screensaver-dbus PRIVATE ${DBUS_INCLUDE_DIRS})
-target_link_libraries(screensaver-dbus INTERFACE PkgConfig::DBUS)
+target_link_libraries(screensaver-dbus PRIVATE ${DBUS_LINK_LIBRARIES})
