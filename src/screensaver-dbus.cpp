@@ -18,16 +18,16 @@ bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = 
 		dbus_connection_unref(connection);
 		return false;
 	}
-	char* dbus_method;
+	char* bus_method;
 	if (inhibit_requested)
 	{
-		dbus_method = (char*)"Inhibit";
+		bus_method = (char*)"Inhibit";
 	}
 	else
 	{
-		dbus_method = (char*)"UnInhibit";
+		bus_method = (char*)"UnInhibit";
 	}
-	DBusMessage* message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, dbus_method);
+	DBusMessage* message = dbus_message_new_method_call(BUS_NAME, BUS_PATH, BUS_INTERFACE, bus_method);
 	if (!message)
 	{
 		return false;
