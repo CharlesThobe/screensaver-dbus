@@ -58,6 +58,7 @@ bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, char* program_nam
 			dbus_message_unref(message);
 			return false;
 		}
+		cookie = 0;
 	}
 	//Send message and get response.
 	DBusMessage* response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
@@ -90,5 +91,9 @@ bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, char* program_nam
 	}
 	#endif
 	return true;
-	
+}
+
+bool ScreenSaverStateDBusIsInhibited()
+{
+	return cookie;
 }
