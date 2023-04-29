@@ -47,9 +47,9 @@ bool ChangeScreenSaverStateDBus(bool inhibit_requested, const char* program_name
 	response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
 	if (!response || dbus_error_is_set(&error_dbus))
 		goto cleanup;
-	// Get the cookie from the response message.
 	if (inhibit_requested)
 	{
+		// Get the cookie from the response message.
 		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &s_cookie, DBUS_TYPE_INVALID))
 			goto cleanup;
 	}
