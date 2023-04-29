@@ -1,2 +1,4 @@
 # screensaver-dbus
-To build an executable to test pass `-DTEST` flag to cmake.
+Depends on libDBus `libdbus-1-dev`
+
+The CMake builds a static library `screensaver-dbus` and a test executable `test` by default.
