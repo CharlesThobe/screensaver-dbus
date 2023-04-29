@@ -3,7 +3,7 @@
 #define BUS_PATH "/org/freedesktop/ScreenSaver"
 #define BUS_INTERFACE "org.freedesktop.ScreenSaver"
 static dbus_uint32_t s_cookie;
-bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, const char* program_name = "Unknown", const char* reason = "Unknown")
+bool ChangeScreenSaverStateDBus(bool inhibit_requested, const char* program_name, const char* reason)
 {
 	DBusError error_dbus;
 	dbus_error_init(&error_dbus);

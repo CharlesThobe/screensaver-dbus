@@ -1,2 +1,2 @@
-bool ChangeScreenSaverStateDBus(bool inhibit_requested, const char* program_name, const char* reason);
+bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, const char* program_name = "Unknown", const char* reason = "Unknown");
 bool ScreenSaverStateDBusIsInhibited();
