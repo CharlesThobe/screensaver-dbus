@@ -1,24 +1,22 @@
 cmake_minimum_required(VERSION 3.25)
 project("screensaver-gdbus")
 
-if(TEST)
-    add_executable(screensaver-dbus
-    src/screensaver-dbus.cpp
-    )
-    add_compile_definitions(TEST)
-    install(TARGETS screensaver-dbus DESTINATION bin)
-else()
-    add_library(screensaver-dbus
-    src/screensaver-dbus.cpp
-    )
-    install(TARGETS screensaver-dbus DESTINATION lib)
-endif()
+add_executable(test
+src/main.cpp
+)
+
+add_library(screensaver-dbus
+src/screensaver-dbus.cpp
+)
+install(TARGETS screensaver-dbus DESTINATION lib)
 
 if(CONNECTION_RESET)
-    add_compile_definitions(CONNECTION_RESET)
+    target_compile_definitions(screensaver-dbus PRIVATE CONNECTION_RESET)
 endif()
 
+target_link_libraries(test PRIVATE screensaver-dbus)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
-target_link_libraries(screensaver-dbus PkgConfig::DBUS)
+target_include_directories(screensaver-dbus PRIVATE ${DBUS_INCLUDE_DIRS})
+target_link_libraries(screensaver-dbus INTERFACE PkgConfig::DBUS)

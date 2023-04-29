@@ -4,7 +4,7 @@
 #define BUS_INTERFACE "org.freedesktop.ScreenSaver"
 static DBusConnection* connection = nullptr;
 static dbus_uint32_t cookie;
-bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = (char*)"Unknown", char* reason = (char*)"Unknown")
+bool ChangeScreenSaverStateDBus(bool inhibit_requested = true, char* program_name = (char*)"Unknown", char* reason = (char*)"Unknown")
 {
 	//Initialize a DBusError var.
 	DBusError error_dbus;
@@ -92,23 +92,3 @@ bool ChangeScreenSaverState(bool inhibit_requested = true, char* program_name = 
 	return true;
 	
 }
-
-#ifdef TEST
-#include <mutex>
-int main(){
-	ChangeScreenSaverState(true, (char*)"Test ProgName", (char*)"Test Reason");
-	printf("Ihibited\nPress enter to uninhibit.\n");
-	getchar();
-	ChangeScreenSaverState(false, (char*)"Test ProgName", (char*)"Test Reason");
-	printf("uninhibited\nPress enter to test for memory leaks.\n");
-	getchar();
-	printf("Stress running\nPress ctl+c to terminate\n");
-	while(true)
-	{
-		ChangeScreenSaverState(true, (char*)"Test ProgName", (char*)"Test Reason");
-		ChangeScreenSaverState(false, (char*)"Test ProgName", (char*)"Test Reason");
-	}
-
-	return 0;
-}
-#endif

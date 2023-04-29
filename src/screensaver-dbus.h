@@ -1,1 +1,1 @@
-bool ChangeScreenSaverState(bool inhibit_requested, char* program_name, char* reason);
+bool ChangeScreenSaverStateDBus(bool inhibit_requested, char* program_name, char* reason);
