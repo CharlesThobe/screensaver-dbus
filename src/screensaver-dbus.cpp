@@ -2,7 +2,7 @@
 #define BUS_NAME "org.freedesktop.ScreenSaver"
 #define BUS_PATH "/org/freedesktop/ScreenSaver"
 #define BUS_INTERFACE "org.freedesktop.ScreenSaver"
-static dbus_uint32_t s_cookie;
+static dbus_uint32_t s_screensaver_dbus_cookie;
 bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* program_name, const char* reason)
 {
 	// "error_dbus" doesn't need to be cleared in the end with "dbus_message_unref" at least if there is
@@ -36,9 +36,9 @@ bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* progra
 	else
 	{
 		// Only Append the cookie.
-		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &s_cookie))
+		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &s_screensaver_dbus_cookie))
 			goto cleanup;
-		s_cookie = 0;
+		s_screensaver_dbus_cookie = 0;
 	}
 	// Send message and get response.
 	if (!(response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus)) 
@@ -47,7 +47,7 @@ bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* progra
 	if (inhibit_requested)
 	{
 		// Get the cookie from the response message.
-		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &s_cookie, DBUS_TYPE_INVALID))
+		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &s_screensaver_dbus_cookie, DBUS_TYPE_INVALID))
 			goto cleanup;
 	}
 	dbus_message_unref(message);
@@ -67,5 +67,5 @@ bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* progra
 
 bool ScreenSaverStateDBusIsInhibited()
 {
-	return s_cookie;
+	return s_screensaver_dbus_cookie;
 }
