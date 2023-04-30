@@ -3,7 +3,7 @@
 #define BUS_PATH "/org/freedesktop/ScreenSaver"
 #define BUS_INTERFACE "org.freedesktop.ScreenSaver"
 static dbus_uint32_t s_cookie;
-bool ChangeScreenSaverStateDBus(bool inhibit_requested, const char* program_name, const char* reason)
+bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* program_name, const char* reason)
 {
 	// "error_dbus" doesn't need to be cleared in the end with "dbus_message_unref" at least if there is
 	// no error set, since calling "dbus_error_free" reinitializes it like "dbus_error_init" after freeing.
