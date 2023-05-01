@@ -27,6 +27,9 @@ bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* progra
 	dbus_message_iter_init_append(message, &message_itr);
 	if (inhibit_requested)
 	{
+		// Guard against repeat inhibition which add extra inhibitors each requiring a different cookie.
+		if (s_cookie)
+			goto cleanup;
 		// Append process/window name.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_STRING, &program_name))
 			goto cleanup;
@@ -55,7 +58,6 @@ bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* progra
 	dbus_message_unref(response);
 	return true;
 	cleanup:
-			s_cookie = 0;
 			if (dbus_error_is_set(&error_dbus))
 				dbus_error_free(&error_dbus);
 			if (connection)

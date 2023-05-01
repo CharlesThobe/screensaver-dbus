@@ -1,18 +1,46 @@
 #include "screensaver-dbus.h"
 #include <stdio.h>
+#include <iostream>
 int main(){
-	ChangeScreenSaverStateDBus(true, "Test ProgName", "Test Reason");
-	printf("Ihibited\nPress enter to uninhibit.\n");
-	getchar();
-	ChangeScreenSaverStateDBus(false, "Test ProgName", "Test Reason");
-	printf("uninhibited\nPress enter to test for memory leaks.\n");
-	getchar();
-	printf("Stress running\nPress ctl+c to terminate\n");
-	while(true)
+	char input;
+	printf("Enter character then hit enter\nValid inputs are:\n\"i\" for inhibiting\n\"u\" for uninhibiting\n\"s\" for stress testing (for memory leak detection)\nand \"x\" to exit.\n");
+	printf("command: ");
+	while (true)
 	{
-		ChangeScreenSaverStateDBus(true, "Test ProgName", "Test Reason");
-		ChangeScreenSaverStateDBus(false, "Test ProgName", "Test Reason");
+		std::cin >> input;
+		if (input == 'i')
+			{
+				if(ChangeScreenSaverStateDBus(true))
+					printf("success, inhibition status is %d\n", ScreenSaverStateDBusIsInhibited());
+				else
+					printf("failure, inhibition status is %d\n", ScreenSaverStateDBusIsInhibited());
+				printf("command: ");
+			}
+		else if (input == 'u')
+			{
+				if(ChangeScreenSaverStateDBus(false))
+					printf("success, inhibition status is %d\n", ScreenSaverStateDBusIsInhibited());
+				else
+					printf("failure, inhibition status is %d\n", ScreenSaverStateDBusIsInhibited());
+				printf("command: ");
+			}
+		else if (input == 's')
+			{
+				printf("Stress running\nPress ctl+c to terminate\n");
+				while(true)
+					{
+						ChangeScreenSaverStateDBus(true);
+						ChangeScreenSaverStateDBus(false);
+					}
+			}
+		else if (input == 'x')
+			{
+				return 0;
+			}
+		else
+			{
+				printf("Wrong input, Valid inputs are \"i\", \"u\", \"s\" and \"x\"\n");
+				printf("command: ");
+			}
 	}
-
-	return 0;
 }
