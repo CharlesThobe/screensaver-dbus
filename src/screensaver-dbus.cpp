@@ -6,15 +6,14 @@
 static dbus_uint32_t s_cookie;
 bool ChangeScreenSaverStateDBus(const bool inhibit_requested, const char* program_name, const char* reason)
 {
-	// "error_dbus" doesn't need to be cleared in the end with "dbus_message_unref" at least if there is
+	const char* bus_method = (inhibit_requested) ? "Inhibit" : "UnInhibit";
+	// "error_dbus" doesn't need to be cleared at the end with "dbus_message_unref" at least if there is
 	// no error set, since calling "dbus_error_free" reinitializes it like "dbus_error_init" after freeing.
 	DBusError error_dbus;
 	dbus_error_init(&error_dbus);
 	DBusConnection* connection = nullptr;
 	DBusMessage* message = nullptr;
 	DBusMessage* response = nullptr;
-	// Initialized here because initializations should be before "goto" statements.
-	const char* bus_method = (inhibit_requested) ? "Inhibit" : "UnInhibit";
 	// "dbus_bus_get" gets a pointer to the same connection in libdbus, if exists, without creating a new connection.
 	// this doesn't need to be deleted, except if there's an error then calling "dbus_connection_unref", to free it,
 	// might be better so a new connection is established on the next try.
