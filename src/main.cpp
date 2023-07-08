@@ -1,11 +1,10 @@
 #include "screensaver-dbus.h"
-#include <stdio.h>
 #include <iostream>
 
 void CallFunctionAndPrintTestMessage(bool inhibit_requested)
 {
 	const char* state;
-	if (ChangeScreenSaverStateDBus(inhibit_requested))
+	if (SetScreensaverInhibitorDBus(inhibit_requested))
 	{
 		state = "Success";
 	}
@@ -13,7 +12,7 @@ void CallFunctionAndPrintTestMessage(bool inhibit_requested)
 	{
 		state = "Failure";
 	}
-	printf("%s, inhibition status is %d\n", state, ScreenSaverStateDBusIsInhibited());
+	printf("%s, inhibition status is %d\n", state, ScreensaverInhibitorIsUp());
 	printf("Command: ");
 }
 
@@ -37,8 +36,8 @@ int main()
 				printf("Stress running\nPress ctl+c to terminate\n");
 				while(true)
 				{
-					ChangeScreenSaverStateDBus(true);
-					ChangeScreenSaverStateDBus(false);
+					SetScreensaverInhibitorDBus(true);
+					SetScreensaverInhibitorDBus(false);
 				}
 			case 'x':
 				return 0;
