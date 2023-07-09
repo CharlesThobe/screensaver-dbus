@@ -12,6 +12,7 @@ bool SetScreensaverInhibitorDBus(const bool inhibit_requested, const char* progr
 	const char* bus_method = (inhibit_requested) ? "Inhibit" : "UnInhibit";
 	DBusError error_dbus;
 	DBusConnection* connection = nullptr;
+	static DBusConnection* s_comparison_connection;
 	DBusMessage* message = nullptr;
 	DBusMessage* response = nullptr;
 	DBusMessageIter message_itr;
@@ -21,7 +22,12 @@ bool SetScreensaverInhibitorDBus(const bool inhibit_requested, const char* progr
 	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
 	if (!connection || (dbus_error_is_set(&error_dbus)))
 		goto error_cleanup;
-	dbus_connection_set_exit_on_disconnect(connection, false);
+	if (s_comparison_connection != connection)
+	{
+		dbus_connection_set_exit_on_disconnect(connection, false);
+		s_cookie = 0;
+		s_comparison_connection = connection;
+	}
 	message = dbus_message_new_method_call("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", bus_method);
 	if (!message)
 		goto error_cleanup;
