@@ -18,10 +18,12 @@ bool SetScreensaverInhibitorDBus(const bool inhibit_requested, const char* progr
 
 	dbus_error_init(&error_dbus);
 	// Calling dbus_bus_get() after the first time returns a pointer to the existing connection.
-	if (!(connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus)) || (dbus_error_is_set(&error_dbus)))
+	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
+	if (!connection || (dbus_error_is_set(&error_dbus)))
 		goto error_cleanup;
 	dbus_connection_set_exit_on_disconnect(connection, false);
-	if (!(message = dbus_message_new_method_call("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", bus_method)))
+	message = dbus_message_new_method_call("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", bus_method);
+	if (!message)
 		goto error_cleanup;
 	// Initialize an append iterator for the message, gets freed with the message.
 	dbus_message_iter_init_append(message, &message_itr);
@@ -44,7 +46,8 @@ bool SetScreensaverInhibitorDBus(const bool inhibit_requested, const char* progr
 			goto error_cleanup;
 	}
 	// Send message and get response.
-	if (!(response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus)) || dbus_error_is_set(&error_dbus))
+	response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
+	if (!response || dbus_error_is_set(&error_dbus))
 		goto error_cleanup;
 	s_cookie = 0;
 	if (inhibit_requested)
