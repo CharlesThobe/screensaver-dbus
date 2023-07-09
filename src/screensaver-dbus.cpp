@@ -4,7 +4,7 @@
 static dbus_uint32_t s_cookie;
 #endif
 
-bool SetScreensaverInhibitorDBus(const bool inhibit_requested, const char* program_name, const char* reason)
+bool SetScreensaverInhibitDBus(const bool inhibit_requested, const char* program_name, const char* reason)
 {
 #ifndef TEST_BUILD
 	static dbus_uint32_t s_cookie;

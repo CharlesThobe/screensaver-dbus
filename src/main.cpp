@@ -4,7 +4,7 @@
 void CallFunctionAndPrintTestMessage(bool inhibit_requested)
 {
 	const char* state;
-	if (SetScreensaverInhibitorDBus(inhibit_requested))
+	if (SetScreensaverInhibitDBus(inhibit_requested))
 	{
 		state = "Success";
 	}
@@ -36,8 +36,8 @@ int main()
 				printf("Stress running\nPress ctl+c to terminate\n");
 				while(true)
 				{
-					SetScreensaverInhibitorDBus(true);
-					SetScreensaverInhibitorDBus(false);
+					SetScreensaverInhibitDBus(true);
+					SetScreensaverInhibitDBus(false);
 				}
 			case 'x':
 				return 0;
