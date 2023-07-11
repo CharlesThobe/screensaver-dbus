@@ -21,7 +21,7 @@ bool SetScreensaverInhibitDBus(const bool inhibit_requested, const char* program
 	// Calling dbus_bus_get() after the first time returns a pointer to the existing connection.
 	connection = dbus_bus_get(DBUS_BUS_SESSION, &error_dbus);
 	if (!connection || (dbus_error_is_set(&error_dbus)))
-		goto error_cleanup;
+		goto cleanup;
 	if (s_comparison_connection != connection)
 	{
 		dbus_connection_set_exit_on_disconnect(connection, false);
@@ -30,45 +30,44 @@ bool SetScreensaverInhibitDBus(const bool inhibit_requested, const char* program
 	}
 	message = dbus_message_new_method_call("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", bus_method);
 	if (!message)
-		goto error_cleanup;
+		goto cleanup;
 	// Initialize an append iterator for the message, gets freed with the message.
 	dbus_message_iter_init_append(message, &message_itr);
 	if (inhibit_requested)
 	{
 		// Guard against repeat inhibitions which would add extra inhibitors each generating a different cookie.
 		if (s_cookie)
-			goto repeat_inhibit_cleanup;
+			goto cleanup;
 		// Append process/window name.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_STRING, &program_name))
-			goto error_cleanup;
+			goto cleanup;
 		// Append reason for inhibiting the screensaver.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_STRING, &reason))
-			goto error_cleanup;
+			goto cleanup;
 	}
 	else
 	{
 		// Only Append the cookie.
 		if (!dbus_message_iter_append_basic(&message_itr, DBUS_TYPE_UINT32, &s_cookie))
-			goto error_cleanup;
+			goto cleanup;
 	}
 	// Send message and get response.
 	response = dbus_connection_send_with_reply_and_block(connection, message, DBUS_TIMEOUT_USE_DEFAULT, &error_dbus);
 	if (!response || dbus_error_is_set(&error_dbus))
-		goto error_cleanup;
+		goto cleanup;
 	s_cookie = 0;
 	if (inhibit_requested)
 	{
 		// Get the cookie from the response message.
 		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &s_cookie, DBUS_TYPE_INVALID) || dbus_error_is_set(&error_dbus))
-			goto error_cleanup;
+			goto cleanup;
 	}
 	dbus_message_unref(message);
 	dbus_message_unref(response);
 	return true;
-error_cleanup:
+cleanup:
 	if (dbus_error_is_set(&error_dbus))
 		dbus_error_free(&error_dbus);
-repeat_inhibit_cleanup:
 	if (message)
 		dbus_message_unref(message);
 	if (response)
