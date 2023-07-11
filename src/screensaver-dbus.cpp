@@ -16,6 +16,7 @@ bool SetScreensaverInhibitDBus(const bool inhibit_requested, const char* program
 	DBusMessage* message = nullptr;
 	DBusMessage* response = nullptr;
 	DBusMessageIter message_itr;
+	bool exit_status = false;
 
 	dbus_error_init(&error_dbus);
 	// Calling dbus_bus_get() after the first time returns a pointer to the existing connection.
@@ -62,9 +63,7 @@ bool SetScreensaverInhibitDBus(const bool inhibit_requested, const char* program
 		if (!dbus_message_get_args(response, &error_dbus, DBUS_TYPE_UINT32, &s_cookie, DBUS_TYPE_INVALID) || dbus_error_is_set(&error_dbus))
 			goto cleanup;
 	}
-	dbus_message_unref(message);
-	dbus_message_unref(response);
-	return true;
+	exit_status = true;
 cleanup:
 	if (dbus_error_is_set(&error_dbus))
 		dbus_error_free(&error_dbus);
@@ -72,7 +71,7 @@ cleanup:
 		dbus_message_unref(message);
 	if (response)
 		dbus_message_unref(response);
-	return false;
+	return exit_status;
 }
 
 #ifdef TEST_BUILD
